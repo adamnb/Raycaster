@@ -6,11 +6,11 @@ class renderer extends PApplet {
   
   int w, h;
   
-  raycast_attempt mWin;
+  Raycaster mWin;
   
   
   void settings () {
-    mWin = new raycast_attempt();
+    mWin = new Raycaster();
     size (1100, 500);
     w = width;
     h = height;

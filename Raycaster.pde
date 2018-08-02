@@ -83,6 +83,7 @@ void draw () {
   text("(" + px + ", " + py + ")", px + 6, py + 6);
     
   // Rendering IN 3D!!!
+  // List all rays' distances
   for (float ang = angleRad; ang < angleRad + coneAngleRad; ang += coneAngleRad / rayCount){
     distances.add(raycast(px, py, ang));
   }
@@ -92,12 +93,13 @@ void draw () {
   rectMode(CENTER);
   noStroke();
   
-  
+  // Place distances on screen
   float rectWidth = w/distances.size();
   for (int i = 0; i < distances.size(); i++){
     
     float dist = (float)distances.get(i);
-    float colHeight = RAY_LENGTH - dist;
+    //float colHeight = RAY_LENGTH - dist; // Linear (BAD)
+    float colHeight = 10000000/(PI * (dist*dist)); // Inverse square (NOT AS BAD)
     
     if (colHeight < 0){
       colHeight = 0;
