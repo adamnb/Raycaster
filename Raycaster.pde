@@ -1,5 +1,3 @@
-renderer rWin;
-
 int w, h;
 
 float sw = 200, sh = 200; // Dimensions of the square obstruction
@@ -10,25 +8,35 @@ boolean blocks[][];
 
 float px = 300, py = 300; // Player position
 float spd = 5; // Walk speed
-float m_sens = 0.5; // Mouse sensitivity
+float m_sens = 1; // Mouse sensitivity
 
 static final float RAY_LENGTH = 500; // MAXIMUM length of the ray 
 float lengthSample = 5; // Distance finder precision
 
-int rayCount = 1099; // Must be under window width
-float coneAngle = 120, coneAngleRad;
+int rayCount = 1001; // Must be under window width
+float coneAngle = 60, coneAngleRad;
 float angleDeg = 40, angleRad;
+float nearClipDefault = 6;
+float nearClip = 600; // Near clipping plane
 
-boolean renderReady = false;
+
+boolean draw3d = true;
+boolean draw2d = false;
+boolean drawGround = true;
+color groundColor = color(127, 127, 0);
+
 ArrayList distances = new ArrayList();
 
 void settings () {
-  size(1100, 500);
+  size(1000, 500);
 }
 
+
 void setup () {
-  rWin = new renderer();
-  
+  //rWin = new renderer();
+  rayCountWarning();
+  nearClipWarning(); 
+ 
   w = width; h = height;
   
   blockw = w/gridw;
@@ -40,13 +48,14 @@ void setup () {
       float r = random(-200, 200);
       boolean member = false;
       
-      if (r > 100){member = true; println("Member");}
-      else{member = false; println ("Not a member");}
+      if (r > 100){member = true; /*println("Member");*/}
+      else{member = false; /*println ("Not a member");*/}
       
       blocks[y][x] = member;
     }
   }
 }
+
 
 void draw () {
   angleDeg += (mouseX-pmouseX) * m_sens;
@@ -56,67 +65,77 @@ void draw () {
 
   rectMode(CORNER);
   background(0);
-  noStroke();
   
   // Drawing obstructions
-  strokeWeight(1);
-  noFill();
-  for (int by = 0; by < blocks.length; by ++){
-    for (int bx = 0; bx < blocks[by].length; bx ++){
-      if (blocks[by][bx]){
-        rect (bx*blockw, by*blockh, blockw, blockh);
+  if (draw2d){
+    strokeWeight(1);
+    fill(0, 127, 0);
+    for (int by = 0; by < blocks.length; by ++){
+      for (int bx = 0; bx < blocks[by].length; bx ++){
+        if (blocks[by][bx]){
+          rect (bx*blockw, by*blockh, blockw, blockh);
+        }
       }
     }
   }
-
+  
+  
+  
   // Draw FOV
-  stroke(255, 0, 0);
-  strokeWeight(1);
-  line(px, py, px + (cos(angleRad) * RAY_LENGTH), py + (sin(angleRad) * RAY_LENGTH)); // Left FOV line
-  line(px, py, px + (cos(angleRad + coneAngleRad) * RAY_LENGTH), py + (sin(angleRad + coneAngleRad) * RAY_LENGTH)); // Right FOV line
-
-  // Origin Point
-  stroke(0, 255, 0);
-  strokeWeight(5);
-  point(px, py);
-
-  text("(" + px + ", " + py + ")", px + 6, py + 6);
-    
+  if (draw2d){
+    noFill();
+    stroke(255, 0, 0);
+    strokeWeight(1);
+    line(px, py, px + (cos(angleRad - (coneAngleRad/2)) * RAY_LENGTH), py + (sin(angleRad - (coneAngleRad/2)) * RAY_LENGTH)); // Left FOV line
+    line(px, py, px + (cos(angleRad + (coneAngleRad/2)) * RAY_LENGTH), py + (sin(angleRad + (coneAngleRad/2)) * RAY_LENGTH)); // Right FOV line
+    line(px, py, px + cos(angleRad) * RAY_LENGTH, py + sin(angleRad) * RAY_LENGTH);
+    ellipse (px, py, RAY_LENGTH*2, RAY_LENGTH*2);
+  
+    // Origin Point
+    stroke(0, 255, 0);
+    strokeWeight(5);
+    point(px, py);
+  
+    text("(" + px + ", " + py + ")", px + 6, py + 6);
+  }
   // Rendering IN 3D!!!
   // List all rays' distances
-  for (float ang = angleRad; ang < angleRad + coneAngleRad; ang += coneAngleRad / rayCount){
-    distances.add(raycast(px, py, ang));
-  }
-  //renderReady = true;
-  //println (distances);
-  
-  rectMode(CENTER);
-  noStroke();
-  
-  // Place distances on screen
-  float rectWidth = w/distances.size();
-  for (int i = 0; i < distances.size(); i++){
-    
-    float dist = (float)distances.get(i);
-    //float colHeight = RAY_LENGTH - dist; // Linear (BAD)
-    float colHeight = 10000000/(PI * (dist*dist)); // Inverse square (NOT AS BAD)
-    
-    if (colHeight < 0){
-      colHeight = 0;
+  if (draw3d) {
+    //for (int rayN = 0; rayN < rayCount; rayN ++){
+    for (float ang = angleRad - (coneAngleRad/2); ang < angleRad + (coneAngleRad/2); ang += coneAngleRad / rayCount){
+      
+      distances.add(raycast(px, py, ang));
     }
     
-    fill (255-0.51*dist);
-    rect(i*rectWidth + rectWidth/2, h/2, rectWidth, colHeight);
-    //println (colHeight);
-  }
-  
-  //rWin.render(distances);
-  //rWin.ready = true;
-  //rWin.thisdistances = distances;
+    if (drawGround){
+      fill (groundColor);
+      rect (0, height/2, width, height/2);
+    }
+   
+    rectMode(CENTER);
+    noStroke();
     
-  distances.clear();
+    // Place distances on screen
+    float rectWidth = w/distances.size();
+    for (int i = 0; i < distances.size(); i++){
+      
+      float dist = (float)distances.get(i);
+      //float colHeight = RAY_LENGTH - dist; // Linear (BAD)
+      float colHeight = 10000000/( PI * pow(dist, 2)); // Inverse square (NOT AS BAD)
+      
+      if (colHeight < 0){ // Prevent inversions
+        colHeight = 0;
+      }
+      
+      fill (colHeight);
+      rect(i*rectWidth + rectWidth/2, h/2, rectWidth, colHeight);
+    }
+    
+    distances.clear();
+  }
 }
 
+// Casting the rays 
 float raycast (float ox, float oy, float angle){
   float y = oy, x = ox; // Set start position to ray origin
   
@@ -131,8 +150,6 @@ float raycast (float ox, float oy, float angle){
 
     stroke (255, 0, 0);
     strokeWeight (3);
-    //point(x, y);
-
     
     for (int iy = 0; iy < blocks.length; iy++){
       for (int ix = 0; ix < blocks[iy].length; ix++){
@@ -143,7 +160,6 @@ float raycast (float ox, float oy, float angle){
         }
       }
     }
-
   }  
   return RAY_LENGTH;
 }
@@ -151,16 +167,56 @@ float raycast (float ox, float oy, float angle){
 
 void keyPressed() {
   if (keyCode == 37) { // strafe left
-    py += sin((angleRad + (coneAngleRad/2))-PI/2) * spd;
-    px += cos((angleRad + (coneAngleRad/2))-PI/2) * spd; 
+    py += sin((angleRad)-PI/2) * spd;
+    px += cos((angleRad)-PI/2) * spd;
+    
   } else if (keyCode == 39) { // strafe right
-    py += sin((angleRad + (coneAngleRad/2))+PI/2) * spd;
-    px += cos((angleRad + (coneAngleRad/2))+PI/2) * spd; 
+    py += sin((angleRad)+PI/2) * spd;
+    px += cos((angleRad)+PI/2) * spd; 
+    
   } else if (keyCode == 38) { // forward
-    px += cos(angleRad + (coneAngleRad/2)) * spd;
-    py += sin(angleRad + (coneAngleRad/2)) * spd;
+    px += cos(angleRad) * spd;
+    py += sin(angleRad) * spd;
+    
   } else if (keyCode == 40) { // backward
-    px -= cos(angleRad + (coneAngleRad/2)) * spd;
-    py -= sin(angleRad + (coneAngleRad/2)) * spd;
+    px -= cos(angleRad) * spd;
+    py -= sin(angleRad) * spd;
+    
+  } else if (keyCode == 50) { // 2
+    draw2d = !draw2d;
+    println ("Toggled 2d display: " + draw2d);
+    blankWarning();
+    
+  } else if (keyCode == 51) {
+    draw3d = !draw3d;
+    println ("Toggled 3d display: " + draw3d);
+    blankWarning();
+    
+  } else if (keyCode == 71) {
+    drawGround = !drawGround;
+    print ("Toggled ground: " + drawGround);
+  }
+   
+}
+
+
+// WARNING MESSAGES
+void blankWarning (){
+  if  (draw2d == false && draw3d == false){
+    println ("Both 2d and 3d display are off. This should display nothing.");
+  }
+}
+
+void rayCountWarning (){
+ if (rayCount > width){
+    println ("The ray count you chose is greater than the screen width. This value will be corrected to " + width + "." );
+    rayCount = width;
+  } 
+}
+
+void nearClipWarning(){
+  if (nearClip >= RAY_LENGTH){
+    println ("The near clipping plane is greater than the ray length limit. This value will be corrected to the default, " + nearClipDefault + ".");
+    nearClip = nearClipDefault;
   }
 }
