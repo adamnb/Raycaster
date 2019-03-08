@@ -1,7 +1,6 @@
 int w = 1000, h = 500;
 
-float sw = 200, sh = 200; // Dimensions of the square obstruction
-int gridw = 10, gridh = 10;
+int gridw = 20, gridh = 10;
 float blockw, blockh;
 boolean blocks[][];
 
