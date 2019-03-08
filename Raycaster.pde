@@ -60,8 +60,7 @@ void setup () {
 
 
 void mouseMoved(){
-  angleDeg += (mouseX-pmouseX) * m_sens;
-  
+  angleDeg += (mouseX-pmouseX) * m_sens; 
 }
 
 
@@ -118,6 +117,10 @@ void draw () {
 
       float dist = (float)distances.get(i); 
       float colHeight = 10000000/(PI * pow(dist, 2)); // Inverse square 
+      
+      if (dist == -1){ // Override column height if ray doesn't touch anything
+        colHeight = 0;
+      }
 
       fill (colHeight); // Brightness
       rect((i*w)/(distances.size()-1), h/2, 2, colHeight);
@@ -155,7 +158,7 @@ float raycast (float ox, float oy, float angle) {
       }
     }
   }  
-  return RAY_LENGTH;
+  return -1; // Ray hit nothing
 }
 
 
