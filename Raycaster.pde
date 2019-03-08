@@ -85,6 +85,7 @@ void draw () {
   text("3d: " + draw3d, 3, h+13);
   text("2d: " + draw2d, 60, h+13);
   text("Bearing: " + angleDeg + "°", 117, h+13);
+  text("FOV: " + coneAngle + "°", 215, h+13 );
 
   // Drawing map obstructions
   if (draw2d) {
@@ -219,6 +220,11 @@ void keyPressed() {
   } else if (keyCode == 71) { // G
     drawGround = !drawGround;
     println ("Toggled ground: " + drawGround);
+  } else if (keyCode == 80) { // P
+    print ("Conangle ++");
+    coneAngle += 1;
+  } else if (keyCode == 79) { // O
+    coneAngle -= 1;
   }
 }
 
