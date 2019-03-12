@@ -96,10 +96,14 @@ void draw () {
   // Rendering IN 3D!!!
   // List all rays' distances
   if (draw3d) {
-    //for (int rayN = 0; rayN < rayCount; rayN ++){
-    for (float ang = angleRad - (coneAngleRad/2); ang <= angleRad + (coneAngleRad/2); ang += coneAngleRad / rayCount) {
-
-      distances.add(raycast(px, py, ang));
+    float g = abs((2*tan(coneAngle/2)*nearClip))/(rayCount-1);
+    
+    //for (float ang = angleRad - (coneAngleRad/2); ang <= angleRad + (coneAngleRad/2); ang += coneAngleRad / rayCount) {
+    for (int i = 0; i < rayCount; i++) {
+      float ang = angleRad - coneAngleRad/2 + (i+1)*(coneAngleRad / rayCount);
+     
+      float r = raycast(px, py, ang);
+      distances.add(r);
     }
     
     noStroke();
@@ -124,7 +128,6 @@ void draw () {
 
       fill (colHeight); // Brightness
       rect((i*w)/(distances.size()-1), h/2, 2, colHeight);
-      
     }
 
     distances.clear();
@@ -221,7 +224,6 @@ void keyPressed() {
     drawGround = !drawGround;
     println ("Toggled ground: " + drawGround);
   } else if (keyCode == 80) { // P
-    print ("Conangle ++");
     coneAngle += 1;
   } else if (keyCode == 79) { // O
     coneAngle -= 1;
