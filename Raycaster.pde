@@ -12,15 +12,15 @@ float m_sens = 1; // Mouse sensitivity
 static final float RAY_LENGTH = 500; // MAXIMUM length of the ray 
 float lengthSample = 5; // Distance finder precision
 
-int rayCount = 9; // Must be under window width
+int rayCount = 1000; // Must be under window width
 float coneAngle = 60, coneAngleRad;
 float angleDeg = 40, angleRad;
 float nearClipDefault = 6;
 float nearClip = 30; // Near clipping plane
 
 boolean run3d = true;
-boolean draw3d = false;
-boolean draw2d = true;
+boolean draw3d = true;
+boolean draw2d = false;
 boolean drawGround = true;
 color groundColor = color(127, 127, 0);
 
