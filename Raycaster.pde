@@ -18,7 +18,6 @@ float angleDeg = 40, angleRad;
 float nearClipDefault = 6;
 float nearClip = 600; // Near clipping plane
 
-
 boolean draw3d = true;
 boolean draw2d = false;
 boolean drawGround = true;
@@ -56,6 +55,7 @@ void setup () {
   }
 }
 
+
 void draw () {
   
   // Angle loop around
@@ -75,10 +75,10 @@ void draw () {
 
   // Debug bar
   fill (255);
-  text("3d: " + draw3d, 3, h+13);
-  text("2d: " + draw2d, 60, h+13);
-  text("Bearing: " + angleDeg + "°", 117, h+13);
-  text("FOV: " + coneAngle + "°", 215, h+13 );
+  text("3d: " + draw3d, 3, h+15);
+  text("2d: " + draw2d, 60, h+15);
+  text("Bearing: " + angleDeg + "°", 117, h+15);
+  text("FOV: " + coneAngle + "°", 215, h+15);
 
   // Drawing map obstructions
   if (draw2d) {
