@@ -32,7 +32,6 @@ void settings () {
 
 
 void setup () {
-  //rWin = new renderer();
   rayCountWarning();
   nearClipWarning();
   coneAngleWarning();
@@ -56,12 +55,6 @@ void setup () {
     }
   }
 }
-
-
-void mouseMoved(){
-  angleDeg += (mouseX-pmouseX) * m_sens; 
-}
-
 
 void draw () {
   
@@ -101,7 +94,6 @@ void draw () {
     //for (float ang = angleRad - (coneAngleRad/2); ang <= angleRad + (coneAngleRad/2); ang += coneAngleRad / rayCount) {
     for (int i = 0; i < rayCount; i++) {
       float ang = angleRad - coneAngleRad/2 + (i+1)*(coneAngleRad / rayCount);
-     
       float r = raycast(px, py, ang);
       distances.add(r);
     }
@@ -118,7 +110,6 @@ void draw () {
     float rectWidth = w/distances.size();
 
     for (int i = 0; i < distances.size(); i++) {
-
       float dist = (float)distances.get(i); 
       float colHeight = 10000000/(PI * pow(dist, 2)); // Inverse square 
       
@@ -127,7 +118,7 @@ void draw () {
       }
 
       fill (colHeight); // Brightness
-      colHeight = constrain(colHeight, 0, h);
+      colHeight = constrain(colHeight, 0, h); // Prevents encroachment over debug bar
       rect((i*w)/(distances.size()-1), h/2, 2, colHeight);
     }
 
@@ -163,99 +154,4 @@ float raycast (float ox, float oy, float angle) {
     }
   }  
   return -1; // Ray hit nothing
-}
-
-
-void drawObstructions (){
-  strokeWeight(1);
-  fill(0, 127, 0);
-  for (int by = 0; by < blocks.length; by ++) {
-    for (int bx = 0; bx < blocks[by].length; bx ++) {
-      if (blocks[by][bx]) {
-        rect (bx*blockw, by*blockh, blockw, blockh);
-      }
-    }
-  }
-}
-
-void draw2dGuides () {
-  noFill();
-  stroke(255, 0, 0);
-  strokeWeight(1);
-  line(px, py, px + (cos(angleRad - (coneAngleRad/2)) * RAY_LENGTH), py + (sin(angleRad - (coneAngleRad/2)) * RAY_LENGTH)); // Left FOV line
-  line(px, py, px + (cos(angleRad + (coneAngleRad/2)) * RAY_LENGTH), py + (sin(angleRad + (coneAngleRad/2)) * RAY_LENGTH)); // Right FOV line
-  line(px, py, px + cos(angleRad) * RAY_LENGTH, py + sin(angleRad) * RAY_LENGTH); // Center line
-  ellipse (px, py, RAY_LENGTH*2, RAY_LENGTH*2); // Ray limit
-  ellipse (px, py, nearClip*2, nearClip*2); // Near clipping circle (clipping plane tangent to this)
-
-  // Origin Point
-  stroke(0, 255, 0);
-  strokeWeight(5); 
-  point(px, py);
-
-  text("(" + px + ", " + py + ")", px + 6, py + 6);
-}
-
-void keyPressed() {
-  if (keyCode == 37) { // strafe left
-    py += sin((angleRad)-PI/2) * spd;
-    px += cos((angleRad)-PI/2) * spd;
-  } else if (keyCode == 39) { // strafe right
-    py += sin((angleRad)+PI/2) * spd;
-    px += cos((angleRad)+PI/2) * spd;
-  } else if (keyCode == 38) { // forward
-    px += cos(angleRad) * spd;
-    py += sin(angleRad) * spd;
-  } else if (keyCode == 40) { // backward
-    px -= cos(angleRad) * spd;
-    py -= sin(angleRad) * spd;
-  } else if (keyCode == 81) { // Q: Turn left 
-    angleDeg -= 1;
-  } else if (keyCode == 69) { // E: Turn right
-    angleDeg += 1;
-  } else if (keyCode == 50) { // 2
-    draw2d = !draw2d;
-    println ("Toggled 2d display: " + draw2d);
-    blankWarning();
-  } else if (keyCode == 51) { // 3
-    draw3d = !draw3d;
-    println ("Toggled 3d display: " + draw3d);
-    blankWarning();
-  } else if (keyCode == 71) { // G
-    drawGround = !drawGround;
-    println ("Toggled ground: " + drawGround);
-  } else if (keyCode == 80) { // P
-    coneAngle += 1;
-  } else if (keyCode == 79) { // O
-    coneAngle -= 1;
-  }
-}
-
-
-// WARNING MESSAGES
-void blankWarning () {
-  if  (draw2d == false && draw3d == false) {
-    println ("Both 2d and 3d display are off. This should display nothing.");
-  }
-}
-
-void rayCountWarning () {
-  if (rayCount > width) {
-    println ("The ray count you chose is greater than the screen width. This value will be corrected to " + width + "." );
-    rayCount = width;
-  }
-}
-
-void nearClipWarning() {
-  if (nearClip >= RAY_LENGTH) {
-    println ("The near clipping plane is greater than the ray length limit. This value will be corrected to the default, " + nearClipDefault + ".");
-    nearClip = nearClipDefault;
-  }
-}
-
-void coneAngleWarning(){
-  if (coneAngle >= 180){
-    println("The FOV cone angle is greater than 180°. This value will be corrected to 60");
-    coneAngle = 60;
-  }
 }
