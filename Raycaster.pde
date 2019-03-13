@@ -127,6 +127,7 @@ void draw () {
       }
 
       fill (colHeight); // Brightness
+      colHeight = constrain(colHeight, 0, h);
       rect((i*w)/(distances.size()-1), h/2, 2, colHeight);
     }
 
