@@ -27,6 +27,9 @@ void keyPressed() {
     draw3d = !draw3d;
     println ("Toggled 3d display: " + draw3d);
     blankWarning();
+  } else if (keyCode == 52) {
+    run3d = !run3d;
+    println("Toggled 3d: " + run3d);
   } else if (keyCode == 71) { // G
     drawGround = !drawGround;
     println ("Toggled ground: " + drawGround);

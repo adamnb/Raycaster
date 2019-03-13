@@ -12,14 +12,15 @@ float m_sens = 1; // Mouse sensitivity
 static final float RAY_LENGTH = 500; // MAXIMUM length of the ray 
 float lengthSample = 5; // Distance finder precision
 
-int rayCount = 1001; // Must be under window width
+int rayCount = 9; // Must be under window width
 float coneAngle = 60, coneAngleRad;
 float angleDeg = 40, angleRad;
 float nearClipDefault = 6;
-float nearClip = 600; // Near clipping plane
+float nearClip = 30; // Near clipping plane
 
-boolean draw3d = true;
-boolean draw2d = false;
+boolean run3d = true;
+boolean draw3d = false;
+boolean draw2d = true;
 boolean drawGround = true;
 color groundColor = color(127, 127, 0);
 
@@ -57,7 +58,6 @@ void setup () {
 
 
 void draw () {
-  
   // Angle loop around
   if (angleDeg > 360){
     angleDeg = angleDeg - 360;
@@ -75,10 +75,11 @@ void draw () {
 
   // Debug bar
   fill (255);
-  text("3d: " + draw3d, 3, h+15);
-  text("2d: " + draw2d, 60, h+15);
-  text("Bearing: " + angleDeg + "°", 117, h+15);
-  text("FOV: " + coneAngle + "°", 215, h+15);
+  text("Disp. 3d: " + draw3d, 3, h+15);
+  text("Disp. 2d: " + draw2d, 90, h+15);
+  text("Run 3d: " + run3d, 180, h+15);
+  text("Bearing: " + angleDeg + "°", 270, h+15);
+  text("FOV: " + coneAngle + "°", 360, h+15);
 
   // Drawing map obstructions
   if (draw2d) {
@@ -88,18 +89,24 @@ void draw () {
 
   // Rendering IN 3D!!!
   // List all rays' distances
-  if (draw3d) {
+  if (run3d) {
     float g = abs((2*tan(coneAngle/2)*nearClip))/(rayCount-1);
     
     //for (float ang = angleRad - (coneAngleRad/2); ang <= angleRad + (coneAngleRad/2); ang += coneAngleRad / rayCount) {
     for (int i = 0; i < rayCount; i++) {
       float ang = angleRad - coneAngleRad/2 + (i+1)*(coneAngleRad / rayCount);
+      //float ang = atan(tan(coneAngle/2)-(g*i));
       float r = raycast(px, py, ang);
+      
+      if (draw2d){
+        drawRays(px, py, ang, r);
+      }
+       
       distances.add(r);
     }
     
     noStroke();
-    if (drawGround) {
+    if (drawGround && draw3d) {
       fill (groundColor);
       rect (0, h/2, w, h/2);
     }
@@ -119,7 +126,8 @@ void draw () {
 
       fill (colHeight); // Brightness
       colHeight = constrain(colHeight, 0, h); // Prevents encroachment over debug bar
-      rect((i*w)/(distances.size()-1), h/2, 2, colHeight);
+      if (draw3d)
+        rect((i*w)/(distances.size()-1), h/2, 2, colHeight);
     }
 
     distances.clear();

@@ -27,3 +27,9 @@ void draw2dGuides () {
 
   text("(" + px + ", " + py + ")", px + 6, py + 6);
 }
+
+void drawRays(float x, float y, float t, float h) { 
+  stroke(127, 0, 255);
+  strokeWeight(2);
+  line(x, y, x + (cos(t)*h), y + (sin(t)*h));
+}
