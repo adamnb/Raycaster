@@ -12,9 +12,9 @@ void rayCountWarning () {
 }
 
 void nearClipWarning() {
-  if (nearClip >= RAY_LENGTH) {
-    println ("The near clipping plane is greater than the ray length limit. This value will be corrected to the default, " + nearClipDefault + ".");
-    nearClip = nearClipDefault;
+  if (clip >= RAY_LENGTH) {
+    println ("The near clipping plane is greater than the ray length limit. This value will be corrected to the default, " + clipDefault + ".");
+    clip = clipDefault;
   }
 }
 

@@ -1,4 +1,4 @@
-int w = 1000, h = 500;
+int w = 1000, h = 500; // Dimensions of play area
 
 int gridw = 20, gridh = 10;
 float blockw, blockh;
@@ -12,17 +12,19 @@ float m_sens = 1; // Mouse sensitivity
 static final float RAY_LENGTH = 500; // MAXIMUM length of the ray 
 float lengthSample = 5; // Distance finder precision
 
-int rayCount = 1000; // Must be under window width
+int rayCount = 500;
+//int rayCount = 10001; // Must be under window width
+int hRes = 1000;
 float coneAngle = 60, coneAngleRad;
 float angleDeg = 40, angleRad;
-float nearClipDefault = 6;
-float nearClip = 30; // Near clipping plane
+float clipDefault = 6;
+float clip = 1; // Near clipping plane
 
 boolean run3d = true;
 boolean draw3d = true;
 boolean draw2d = false;
 boolean drawGround = true;
-color groundColor = color(127, 127, 0);
+color groundColor = color(244, 110, 66);
 
 ArrayList distances = new ArrayList();
 
@@ -71,7 +73,7 @@ void draw () {
   coneAngleRad = radians(coneAngle);
 
   rectMode(CORNER);
-  background(0);
+  background(4, 54, 91);
 
   // Debug bar
   fill (255);
@@ -90,17 +92,18 @@ void draw () {
   // Rendering IN 3D!!!
   // List all rays' distances
   if (run3d) {
-    float g = abs((2*tan(coneAngle/2)*nearClip))/(rayCount-1);
-    
-    //for (float ang = angleRad - (coneAngleRad/2); ang <= angleRad + (coneAngleRad/2); ang += coneAngleRad / rayCount) {
-    for (int i = 0; i < rayCount; i++) {
-      float ang = angleRad - coneAngleRad/2 + (i+1)*(coneAngleRad / rayCount);
-      //float ang = atan(tan(coneAngle/2)-(g*i));
-      float r = raycast(px, py, ang);
-      
-      if (draw2d){
-        drawRays(px, py, ang, r);
-      }
+    float g = abs((2*tan(coneAngle/2)*clip)/(rayCount-1));
+    text("g: " + g, 430, h+15);
+
+    for (int i = 0; i <= hRes; i++) { // Ray sweep loop
+      // Calculate the angle at which the ray should be shot at
+      float static_ang = atan(-clip*tan(coneAngleRad/2) + i * ((2*clip*tan(coneAngleRad/2))/(hRes-1))); 
+      float ang = angleRad + static_ang; // Actual angle relative to player direction
+     
+      float clipping = sqrt(pow(clip*tan(static_ang), 2)+(pow(clip, 2)));
+      float r = raycast(px, py, ang) - clipping; // Cast the ray
+
+      if (draw2d) {drawRays(px, py, ang, r);}
        
       distances.add(r);
     }
@@ -113,23 +116,23 @@ void draw () {
 
     rectMode(CENTER);
 
-    // Place distances on screen
-    float rectWidth = w/distances.size();
-
+    // Placing distances on screen
     for (int i = 0; i < distances.size(); i++) {
-      float dist = (float)distances.get(i); 
-      float colHeight = 10000000/(PI * pow(dist, 2)); // Inverse square 
+      float dist = (float)distances.get(i); // Retrieve distances from list
+      float colHeight = (100/dist)*h;// Triangular Similarity
       
-      if (dist == -1){ // Override column height if ray doesn't touch anything
+      if (dist == -1) // Override column height if ray doesn't touch anything
         colHeight = 0;
-      }
-
-      fill (colHeight); // Brightness
+      
+      float dist8 = 255*(dist/RAY_LENGTH); //  Distance out of 255
+      float brightness = RAY_LENGTH - dist8;
+      //fill (brightness, brightness, brightness, 255); // Brightness
+      fill (255, 255, 255, 255);
       colHeight = constrain(colHeight, 0, h); // Prevents encroachment over debug bar
+       
       if (draw3d)
-        rect((i*w)/(distances.size()-1), h/2, 2, colHeight);
+        rect(((w/rayCount)/2)+(w/rayCount*i), h/2, w/rayCount, colHeight);
     }
-
     distances.clear();
   }
 }
@@ -163,3 +166,7 @@ float raycast (float ox, float oy, float angle) {
   }  
   return -1; // Ray hit nothing
 }
+
+// other angle calculations
+//float ang = angleRad - coneAngleRad/2 + (i+1)*(coneAngleRad / hRes); //Default;
+//float ang = (angleRad-coneAngleRad/2) + (coneAngleRad/rayCount)*i;

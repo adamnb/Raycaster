@@ -18,7 +18,7 @@ void draw2dGuides () {
   line(px, py, px + (cos(angleRad + (coneAngleRad/2)) * RAY_LENGTH), py + (sin(angleRad + (coneAngleRad/2)) * RAY_LENGTH)); // Right FOV line
   line(px, py, px + cos(angleRad) * RAY_LENGTH, py + sin(angleRad) * RAY_LENGTH); // Center line
   ellipse (px, py, RAY_LENGTH*2, RAY_LENGTH*2); // Ray limit
-  ellipse (px, py, nearClip*2, nearClip*2); // Near clipping circle (clipping plane tangent to this)
+  ellipse (px, py, clip*2, clip*2); // Near clipping circle (clipping plane tangent to this)
 
   // Origin Point
   stroke(0, 255, 0);
