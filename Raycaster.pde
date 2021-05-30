@@ -131,7 +131,7 @@ void draw () {
       colHeight = constrain(colHeight, 0, h); // Prevents encroachment over debug bar
        
       if (draw3d)
-        rect(((w/rayCount)/2)+(w/rayCount*i), h/2, w/rayCount, colHeight);
+        rect(((w/rayCount)/2)*i, h/2, w/rayCount, colHeight);
     }
     distances.clear();
   }
